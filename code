@@ -1,0 +1,33 @@
+pip install scapy
+from scapy.all import sniff
+from scapy.layers.inet import IP, TCP, UDP
+
+# Define a function to process each captured packet
+def process_packet(packet):
+    # Check if the packet has an IP layer
+    if packet.haslayer(IP):
+        # Extract source and destination IP addresses
+        src_ip = packet[IP].src
+        dst_ip = packet[IP].dst
+        protocol = packet[IP].proto
+
+        # Initialize protocol name
+        protocol_name = "Unknown"
+
+        # Identify the protocol
+        if packet.haslayer(TCP):
+            protocol_name = "TCP"
+        elif packet.haslayer(UDP):
+            protocol_name = "UDP"
+
+        # Display relevant packet information
+        print(f"Source IP: {src_ip} -> Destination IP: {dst_ip} | Protocol: {protocol_name}")
+
+        # Display payload data if available
+        if packet.haslayer(TCP) or packet.haslayer(UDP):
+            payload = bytes(packet[TCP].payload) if packet.haslayer(TCP) else bytes(packet[UDP].payload)
+            print(f"Payload: {payload}\n")
+
+# Start sniffing network packets
+print("Starting packet sniffer...")
+sniff(filter="ip", prn=process_packet, store=0)
